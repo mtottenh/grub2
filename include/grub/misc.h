@@ -440,6 +440,18 @@ grub_error_load (const struct grub_error_saved *save)
   grub_errno = save->grub_errno;
 }
 
+/* mimic's the linux_setup_data struct so we can just do a memcpy*/
+struct grub_boot_log 
+{
+  grub_uint64_t next;
+  grub_uint32_t type;
+  grub_uint32_t len;
+  char msg[0];
+};
+
+extern struct grub_boot_log *EXPORT_VAR(grub_boot_log_head);
+void EXPORT_FUNC(grub_boot_log) (const char *fmt, ...) __attribute__ ((format (GNU_PRINTF, 1, 2)));
+
 #if BOOT_TIME_STATS
 struct grub_boot_time
 {

@@ -56,6 +56,7 @@ GRUB_MOD_LICENSE ("GPLv3+");
 #else
 #include <grub/i386/pc/vbe.h>
 #include <grub/i386/pc/console.h>
+
 #define HAS_VGA_TEXT 1
 #define DEFAULT_VIDEO_MODE "text"
 #define ACCEPTS_PURE_TEXT 1
@@ -95,6 +96,33 @@ static struct idt_descriptor idt_desc =
     0
   };
 #endif
+/* TODO */
+static grub_uint64_t grub_boot_log_generate_setup_data(void)
+{
+  grub_uint64_t total_len = 0;  
+  grub_uint64_t offset = 0;
+  for(struct grub_boot_log* ptr=grub_boot_log_head; ptr;  ptr=(struct grub_boot_log*)((grub_addr_t)ptr->next))
+    {
+      total_len += (ptr->len -1); /* ptr->len includes the terminating null byte*/
+    }
+  struct linux_setup_data* setup_data = grub_zalloc(sizeof(struct linux_setup_data) + total_len + 1); 
+  setup_data->len = total_len + 1;
+  setup_data->next = 0;
+  setup_data->type = GRUB_LINUX_SETUP_DATA_NONE;
+  if (!setup_data)
+    return 0;
+  struct grub_boot_log* prev = NULL;
+  for(struct grub_boot_log* ptr=grub_boot_log_head; ptr;  prev=ptr, ptr=(struct grub_boot_log*)((grub_addr_t)ptr->next))
+    {
+      /* ptr->len includes the terminating null byte */
+      if (prev) grub_free(prev);
+      grub_memcpy(setup_data->data + offset, ptr->msg, ptr->len - 1);
+      offset += ptr->len -1;
+    }
+  if (prev) grub_free(prev);
+  return (grub_addr_t) setup_data;
+}
+//
 
 static inline grub_size_t
 page_align (grub_size_t size)
@@ -560,7 +588,12 @@ grub_linux_boot (void)
                 real_mode_mem);
 
   ctx.params = real_mode_mem;
-
+  /* Add any setup_data logs */
+  grub_uint64_t log_data = grub_boot_log_generate_setup_data();
+  if (log_data)
+    {
+      linux_params.setup_data = log_data;
+    }
   *ctx.params = linux_params;
   ctx.params->cmd_line_ptr = ctx.real_mode_target + cl_offset;
   grub_memcpy ((char *) ctx.params + cl_offset, linux_cmdline,

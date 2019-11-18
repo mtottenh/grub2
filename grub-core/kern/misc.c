@@ -24,6 +24,7 @@
 #include <grub/term.h>
 #include <grub/env.h>
 #include <grub/i18n.h>
+#include <grub/i386/linux.h>
 
 union printf_arg
 {
@@ -1111,6 +1112,46 @@ grub_fatal (const char *fmt, ...)
 
   grub_abort ();
 }
+struct grub_boot_log *grub_boot_log_head = NULL;
+static struct grub_boot_log **boot_log_tail = &grub_boot_log_head;
+
+void grub_boot_log(const char *fmt, ...)
+{
+  struct grub_boot_log *new_ent;
+  va_list args;
+
+  grub_error_push();
+  va_start (args, fmt);
+  char *s = grub_xvasprintf (fmt, args);
+  va_end (args);
+  if (!s)
+    {
+      grub_errno = 0;
+      grub_error_pop ();
+      return;
+    }
+
+  grub_size_t msg_len = grub_strlen(s);
+  new_ent = grub_zalloc(sizeof(struct grub_boot_log) + msg_len + 1);
+  if (!new_ent)
+    {
+      grub_free (s);
+      grub_errno = 0;
+      grub_error_pop ();
+      return;
+    }
+  new_ent->len = msg_len + 1;
+  new_ent->next = 0;
+  new_ent->type = GRUB_LINUX_SETUP_DATA_NONE; 
+  grub_memcpy(new_ent->msg, s, msg_len);
+  grub_free(s);
+  *boot_log_tail = new_ent;
+  boot_log_tail = (struct grub_boot_log**) &new_ent->next;
+  
+  grub_errno = 0;
+  grub_error_pop ();
+}
+
 
 #if BOOT_TIME_STATS
 

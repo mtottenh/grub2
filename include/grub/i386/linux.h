@@ -325,6 +325,15 @@ struct linux_kernel_params
   grub_uint32_t edd_mbr_sig_buffer[EDD_MBR_SIG_MAX];	/* 290 */
   struct grub_e820_mmap e820_map[(0x400 - 0x2d0) / 20];	/* 2d0 */
 } GRUB_PACKED;
+
+#define GRUB_LINUX_SETUP_DATA_NONE 0
+struct linux_setup_data {
+    grub_uint64_t next;
+    grub_uint32_t type;
+    grub_uint32_t len;
+    grub_uint8_t  data[0];
+};
+
 #endif /* ! ASM_FILE */
 
 #endif /* ! GRUB_I386_LINUX_HEADER */
