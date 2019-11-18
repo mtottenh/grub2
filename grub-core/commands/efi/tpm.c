@@ -26,7 +26,7 @@
 #include <grub/mm.h>
 #include <grub/tpm.h>
 #include <grub/term.h>
-
+#include <grub/misc.h>
 typedef TCG_PCR_EVENT grub_tpm_event_t;
 
 static grub_efi_guid_t tpm_guid = EFI_TPM_GUID;
@@ -294,7 +294,7 @@ grub_tpm2_log_event (grub_efi_handle_t tpm_handle, unsigned char *buf,
   event->Size =
     sizeof (*event) - sizeof (event->Event) + grub_strlen (description) + 1;
   grub_memcpy (event->Event, description, grub_strlen (description) + 1);
-
+  grub_boot_log("TPM:PCR %d:%s\n",pcr,description);
   status = efi_call_5 (tpm->hash_log_extend_event, tpm, 0, (grub_addr_t) buf,
 		       (grub_uint64_t) size, event);
 
