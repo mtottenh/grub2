@@ -1,0 +1,42 @@
+From ef01d7290fe38c6b65dbe8534fac2af622a77c2d Mon Sep 17 00:00:00 2001
+From: Max Tottenham <mtottenh@akamai.com>
+Date: Wed, 20 Nov 2019 16:34:16 +0000
+Subject: [PATCH] Patch force of enable syscall()
+
+---
+ library/entropy_poll.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/library/entropy_poll.c b/library/entropy_poll.c
+index 4556f88a5..b241f45b2 100644
+--- a/library/entropy_poll.c
++++ b/library/entropy_poll.c
+@@ -19,10 +19,7 @@
+  *  This file is part of mbed TLS (https://tls.mbed.org)
+  */
+ 
+-#if defined(__linux__)
+-/* Ensure that syscall() is available even when compiling with -std=c99 */
+-#define _GNU_SOURCE
+-#endif
++
+ 
+ #if !defined(MBEDTLS_CONFIG_FILE)
+ #include "mbedtls/config.h"
+@@ -31,7 +28,12 @@
+ #endif
+ 
+ #include <string.h>
+-
++#if defined(__linux__)
++/* Ensure that syscall() is available even when compiling with -std=c99 */
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#endif
+ #if defined(MBEDTLS_ENTROPY_C)
+ 
+ #include "mbedtls/entropy.h"
+-- 
+2.17.0
+
