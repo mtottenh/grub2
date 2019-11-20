@@ -88,5 +88,5 @@ memchr (const void *s, int c, grub_size_t n)
 #define memcpy grub_memcpy
 #define memmove grub_memmove
 #define memset grub_memset
-
+#define strncmp grub_strncmp
 #endif

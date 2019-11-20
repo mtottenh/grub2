@@ -40,4 +40,5 @@ snprintf (char *str, grub_size_t n, const char *fmt, ...)
   return ret;
 }
 
+#define vsnprintf grub_vsnprintf
 #endif

@@ -30,6 +30,7 @@
 
 void grub_mm_init_region (void *addr, grub_size_t size);
 void *EXPORT_FUNC(grub_malloc) (grub_size_t size);
+void *EXPORT_FUNC(grub_calloc) (grub_size_t size, grub_size_t num);
 void *EXPORT_FUNC(grub_zalloc) (grub_size_t size);
 void EXPORT_FUNC(grub_free) (void *ptr);
 void *EXPORT_FUNC(grub_realloc) (void *ptr, grub_size_t size);

@@ -382,6 +382,14 @@ grub_malloc (grub_size_t size)
   return grub_memalign (0, size);
 }
 
+
+void *
+grub_calloc (grub_size_t size, grub_size_t num)
+{
+  return grub_malloc(size*num);
+}
+
+
 /* Allocate SIZE bytes, clear them and return the pointer.  */
 void *
 grub_zalloc (grub_size_t size)
